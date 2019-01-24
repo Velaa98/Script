@@ -1,0 +1,28 @@
+_vbox() {
+  COMPREPLY=()
+
+  # 1º parámetro posible
+  local PARAMETROS=("-l" "-m" "--help")
+
+  # Opciones posibles para cada parámetro
+  declare -A OPCIONES
+  OPCIONES[-l]="disk machine iso"
+  OPCIONES[-m]="bridge cable iface innet mac ram"
+
+  # Autocompletar la palabra actual
+  local cur=${COMP_WORDS[COMP_CWORD]}
+
+  ## Si el parámetro es --help se elimina -m y -l de PARAMETROS para autocompletar
+  #if [ $3 = "--help" ] ; then
+  #  PARAMETROS=${PARAMETROS[@]:2}
+  #fi
+
+  # Si el argumento anterior es una clave de OPCIONES mostramos las opciones:
+  if [ ${OPCIONES[$3]+1} ] ; then
+    COMPREPLY=( `compgen -W "${OPCIONES[$3]}" -- $cur` )
+  else
+     COMPREPLY=( `compgen -W "${PARAMETROS[*]}" -- $cur` )
+  fi
+}
+
+complete -F _vbox vbox

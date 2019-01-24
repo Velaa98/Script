@@ -1,0 +1,9 @@
+	-a asociar
+	-c crear
+	-d eliminar
+	-h ocultar
+	-l listar
+	-m modificar
+	-p apagar
+	-r arrancar
+	-s mostrar

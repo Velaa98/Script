@@ -1,0 +1,52 @@
+#!/bin/bash
+. funciones.sh
+
+# Ruta del manual:
+manual=/usr/share/man/es/man1/vbox.1.gz
+
+# Ruta del programa principal:
+script=/bin/vbox
+
+# Ruta del fichero de autocompletado:
+#autocomplete=/root/autocomplete_vbox
+
+# Comprueba que el usuario que lo ejecuta tiene permisos de su.
+if [ `id -u` != 0 ]
+then
+	echo "Error: Se necesitan permisos de superusuario"
+	exit
+fi
+
+# Preguntar conformidad.
+# Si no existe el comando y el manual en la ruta devuelve un error.
+if [ -e $manual ] && [ -e $script ] ## && [ -e $autocomplete ]
+then
+	while [ ! $resp ] || ( [ $resp != n ] && [ $resp != s ] )
+	do	
+		read -p "¿Desea desinstalar la orden vbox (s/n)? " resp
+	done
+else
+	echo "Error: La orden vbox no está instalada"
+	exit
+fi
+
+if [ $resp == s ]
+then
+	# Se elimina el script
+	rm -f $script
+
+	# Se elimina el manual
+	rm -f $manual
+
+	# Se elimina el fichero de autocompletado
+	#rm -f $autocomplete
+	# Se comenta la linea que carga en el inicio la configuración del autocompletado.
+	#sed -i 's/source .\/autocomplete_vbox/#source .\/autocomplete_vbox/g' /root/.bashrc
+fi
+
+if [ -e $manual ] && [ -e $script ] ## && [ -e $autocomplete ]
+then
+	echo "Ha ocurrido un error. No se ha completado el proceso de desinstalación"
+else
+	echo "Desinstalación completada"
+fi

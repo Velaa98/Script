@@ -1,0 +1,65 @@
+#!/bin/bash
+. funciones.sh
+
+# Ruta del manual:
+manual=/usr/share/man/es/man1/vbox.1.gz
+
+# Ruta del programa principal:
+script=/bin/vbox
+
+# Ruta del fichero de autocompletado:
+#autocomplete=/root/autocomplete_vbox
+
+# Comprueba que el usuario que lo ejecuta tiene permisos de su.
+if [ `id -u` != 0 ]
+then
+	echo "Error: Se necesitan permisos de superusuario"
+	exit
+fi
+
+comprobar_instalacion_virtualbox
+
+
+# Si existe el comando ya en la ruta indicada pregunta si lo reemplaza.
+if [ -e $script ] 
+then
+	while [ ! $CREAR ] || ( [ $CREAR != n ] && [ $CREAR != s ] )
+	do	
+		read -p "¿Ya existe un comando llamado xbox, deseas continuar y reemplazarlo (s/n)? " CREAR
+	done	
+else
+	CREAR=s
+fi
+
+v_version=$(dpkg -S virtualbox | cut -d ":" -f 1 | sort | uniq)
+if [ $v_version ]
+then
+	if [ $CREAR == s ] ## && [ `dpkg -s $v_version | egrep Status:` == "Status: install ok installed" ]
+	then
+		chmod 755 vbox
+		chown root:root vbox
+		mv vbox $script #Mueve el script a la ruta indicada con el nombre indicado en $script
+		
+		chmod 644 vbox.1.gz
+		chown root:root vbox.1.gz
+		mv vbox.1.gz $manual # Mueve el manual a la ruta indicada en $manual
+		
+		# chmod 700 autocomplete_vbox
+		# chown root:root autocomplete_vbox
+		# mv autocomplete_vbox $autocomplete # Mueve la configuración a la ruta indicada en $
+		# echo "source ./autocomplete_vbox" >> /root/.bashrc # Carga el fichero de configuración en el inicio.
+	elif [ $CREAR == n ]
+	then
+		exit
+	fi
+else
+		echo "Error: Virtualbox no está instalado."
+fi
+
+if [ -e $manual ] && [ -e $script ] ## && [ -e $autocomplete ]
+then
+	echo "Instalación completada"
+	exit
+else
+	echo "Ha ocurrido un error. La instalación no se ha completado"
+fi

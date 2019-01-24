@@ -1,0 +1,9 @@
+OPTSTRING (CADENA_OPCIONES) → variable donde se le pasan las letras que va a reconocer, si es seguida de ":" espera un argumento que se debe separar con espacios en blanco.
+
+
+OPTARG → recoge el argumento de la opción anterior si esta permite introducir un argumento.
+
+OPTERR → es "1" cuando termina de recorrer todas las opciones sin exito, si en OPTSTRING hay : al principio el aviso de opción invalida procedente de getopts es silencioso, es decir, que no se muestra por pantalla. Podemos elegir nosotros el mensaje de error a mostrar como por ejemplo mostrar la ayuda.
+
+
+OPTIND → Es el indice del siguiente argumento a ser procesado.

@@ -1,0 +1,178 @@
+#!/bin/bash
+
+# Nombre del archivo: vbox
+# Fecha de creación: 05-05-2018
+# Autor: José Manuel Vela Fernández
+# Descripción del script: Administra mediante un script las máquinas virtuales que tengas en Virtualbox,
+# 						  pudiéndolas arrancar, eliminar, etc.
+
+. funciones.sh	#Incluimos el fichero que contiene las funciones en el programa principal.
+# source solo funcionaría en shell bash
+
+# Si no se introducen parámetros, el parámetro introducido es "--help" o si el primer carácter
+# introducido como parámetro no es un "-" llama a la función mostrar_ayuda y sale del programa.
+if [ $# == 0 ] || [ $1 == "--help" ] || [ "${1:0:1}" != "-" ]
+then
+	mostrar_ayuda
+	exit
+fi
+
+OPCIONES=":a:c:d:h:l:m:p:r:s:-:"
+# Valores posibles para el getopts detrás de "-", si lleva ":"
+# antes del valor espera un espacio seguido de un parámetro.
+
+while getopts "$OPCIONES" optchar; do
+	case "${optchar}" in
+#		-)
+###		echo $OPTARG
+#### En este caso OPTARG valdría el argumento que pongamos detrás del "-".
+#### De modo que la orden completa sería por ejemplo: vbox --prueba
+#			case "${OPTARG}" in
+#				prueba)
+#					echo $OPTIND
+#					val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+#					echo "Parsing option: '--${OPTARG}', value: '${val}'" >&2;
+#					echo "primero"
+#					echo $OPTIND
+#					echo "prueba"
+#					;;
+###				loglevel=*)
+###					val=${OPTARG#*=}
+###					opt=${OPTARG%=$val}
+###					echo "Parsing option: '--${opt}', value: '${val}'" >&2
+###					echo "segundo"
+###					;;
+#				*)
+#					if [ "$OPTERR" = 1 ] && [ "${OPCIONES:0:1}" != ":" ]; then
+#						echo "Unknown option --${OPTARG}" >&2
+#					fi
+#					;;
+#			esac
+#			;;
+		a)
+			case "${OPTARG}" in
+				disk)
+					echo "Asocia el disco."
+					;;
+				iso)
+					echo "Asocia la iso."
+					;;
+				*)
+					echo "No existe la opción \"$OPTARG\", consulte el manual."
+					mostrar_ayuda
+					;;
+			esac
+			;;
+		c)
+			case "${OPTARG}" in
+				disk)
+					echo "Crea el disco."
+					;;
+				machine)
+					echo "Crea la maquina."
+					;;
+				*)
+					echo "No existe la opción \"$OPTARG\", consulte el manual."
+					mostrar_ayuda
+					;;
+			esac
+			;;
+		d)
+			case "${OPTARG}" in
+				disk)
+					echo "Borra el disco."
+					;;
+				machine)
+					vboxmanage unregistervm $3 --delete
+					;;
+				*)
+					echo "No existe la opción \"$OPTARG\", consulte el manual."
+					mostrar_ayuda
+					;;
+			esac
+			;;
+		h)
+			vboxmanage unregistervm $2
+			;;
+		l)
+			case "${OPTARG}" in
+				disk)
+					vboxmanage list hdds
+					;;
+				machine)
+					vboxmanage list vms
+					;;
+				iso)
+					vboxmanage list dvds
+					;;
+				*)
+					echo "No existe la opción \"$OPTARG\", consulte el manual."
+					mostrar_ayuda
+					;;
+			esac
+			;;
+		m)
+####No entiendo porque aquí solo tengo que retroceder 1 y en -l (delete) son 2
+			case "${OPTARG}" in
+				bridge)
+					shift 1
+					echo "Configurar el master del bridge."
+					echo "NumInterfaz = $2"
+					echo "DispositivoMaster = $3"
+					;;
+				cable)
+					shift 1
+					echo "Configurar el conexión o desconexión del cable."
+					echo "NumInterfaz = $2"
+					echo "ON | OFF = $3"
+					;;
+				iface)
+					shift 1
+					echo "Configurar el modo de la interfaz."
+					echo "NumInterfaz = $2"
+					echo "Modo = $3"
+					;;
+				innet)
+					shift 1
+					echo "Configurar el nombre de la red interna."
+					echo "NumInterfaz = $2"
+					echo "NombreRedInterna = $3"
+					;;
+				mac)
+					shift 1
+					echo "Resetear la mac o Configurar una específica."
+					echo "NumInterfaz = $2"
+					echo "Auto|11:22:33:44.... = $3"
+					;;
+				ram)
+					shift 1
+					echo "Configurar la cantidad de ram."
+					echo "NombreMaquina = $2"
+					echo "RAM = $3"
+					;;
+				*)
+					echo "No existe la opción \"$OPTARG\", consulte el manual."
+					mostrar_ayuda
+					;;
+			esac
+			;;
+		p)
+			vboxmanage controlvm $2 poweroff
+			;;
+		r)
+			vboxmanage startvm $2
+			;;
+		s)
+			fichero=`find ~/VirtualBox\ VMs/ -name $2.vbox`
+			vboxmanage registervm "$fichero"
+			;;
+		*)
+			## Si ha recorrido todas las opciones y no coincide con ninguna o
+			## la primera opción espera un parámetro y no se le ha pasado
+			if [ "$OPTERR" != 1 ] || [ "${OPCIONES:0:1}" = ":" ]; then
+				echo "Opción inválida o incompleta: '-${OPTARG}'" >&2
+				echo "Consulte el manual con \"--help\""
+			fi
+			;;
+	esac
+done
